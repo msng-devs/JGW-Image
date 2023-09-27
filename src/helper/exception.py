@@ -6,6 +6,7 @@ class ErrorCode(Enum):
     UNKNOWN_ERROR = ("UNKNOWN_ERROR", "IG-002", 500)
     INVALID_FILE_TYPE = ("INVALID_FILE_TYPE", "IG-003", 400)
     LIMIT_FILE_SIZE = ("LIMIT_FILE_SIZE", "IG-004", 400)
+    FORBIDDEN = ("FORBIDDEN", "IG-005", 403)
 
 
 class InternalException(Exception):

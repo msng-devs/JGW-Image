@@ -31,12 +31,18 @@ def create(db, image_meta: ImageMeta) -> ImageMeta:
     return image_meta
 
 
-def delete_by_id(db, id: int) -> ImageMeta:
+def delete_by_id(db, id: int, who: str = None, check_same_user: bool = True) -> ImageMeta:
     try:
         result = db.query(ImageMeta).filter(ImageMeta.IMAGE_META_PK == id).first()
         assert result is not None
+        if check_same_user:
+            if result.IMAGE_META_UPLOAD_BY != who:
+                raise InternalException(message="해당 이미지를 삭제할 권한이 없습니다.", error_code=ErrorCode.FORBIDDEN)
         db.delete(result)
         db.commit()
+    except InternalException as e:
+        log.debug(str(e))
+        raise e
     except AssertionError as e:
         log.debug(str(e))
         raise InternalException(message="해당 ID로 이미지를 조회할 수 없습니다.", error_code=ErrorCode.NOT_FOUND)
