@@ -17,7 +17,13 @@ class Config:
         self.ALLOWED_FILE_TYPE = os.getenv("ALLOWED_FILE_TYPE").split(",")
         self.TMP_FILE_PATH = get_absolute_path(os.getenv("TMP_FILE_PATH").split("/"))
         self.FILE_CONVERTED_TYPE = os.getenv("FILE_CONVERTED_TYPE")
+        self.CLEAR_TRASH_TIME = [int(x) for x in os.getenv("CLEAR_TRASH_TIME").split(":")]
         tempfile.tempdir = self.TMP_FILE_PATH
 
+        self.MAIL_STORM_SERVER = os.getenv("MAIL_STORM_SERVER")
+        self.MAIL_STORM_PORT = os.getenv("MAIL_STORM_PORT")
+        self.MAIL_STORM_TO = os.getenv("MAIL_STORM_TO")
+
+        self.LOGGING_LEVEL = os.getenv("LOGGING_LEVEL")
 
 config = Config()

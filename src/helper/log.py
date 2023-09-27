@@ -1,6 +1,12 @@
 import logging
+from src.core.config import Config
 
-level = logging.DEBUG
+confing = Config()
+
+level = logging.INFO
+
+if confing.LOGGING_LEVEL == "DEBUG":
+    level = logging.DEBUG
 
 
 def setup_logging():

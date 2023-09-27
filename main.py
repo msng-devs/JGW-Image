@@ -1,14 +1,14 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from starlette.staticfiles import StaticFiles
 from src.core.config import Config
-from src.middleware.upload import LimitUploadSize, LimitFileType
+from src.middleware.upload import LimitUploadSize
 from src.router.router import router
 from src.helper.log import setup_logging
 
 config = Config()
 setup_logging()
 app = FastAPI()
+
 
 app.add_middleware(
     CORSMiddleware,

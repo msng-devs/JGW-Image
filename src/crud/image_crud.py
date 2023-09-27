@@ -12,6 +12,13 @@ def find_by_id(db, id: int) -> ImageMeta:
     return result
 
 
+def find_all_by_converted_names(db, converted_names: list) -> list:
+    result = db.query(ImageMeta).filter(ImageMeta.IMAGE_META_CONVERTED_NM.in_(converted_names)).all()
+    if result is None:
+        return []
+    return result
+
+
 def create(db, image_meta: ImageMeta) -> ImageMeta:
     try:
         db.add(image_meta)
