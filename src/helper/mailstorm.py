@@ -2,9 +2,7 @@ import logging
 import json
 import zmq
 
-from src.core.config import Config
-
-config = Config()
+from src.core.config import config
 
 
 def send_mail(subject: str, text: str):

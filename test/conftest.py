@@ -1,49 +1,43 @@
+from datetime import datetime
 from typing import Generator, Any
 
 import pytest
 from fastapi import FastAPI
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from starlette.testclient import TestClient
-
-from src.db.database import Base, get_db
 from main import create_app
-SQLALCHEMY_DATABASE_URL = "sqlite://"
-
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-
-Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+from src.helper.path import get_absolute_path
+from src.db.database import create_schema, drop_schema, db_session
 
 
 @pytest.fixture(autouse=True)
 def app() -> Generator[FastAPI, Any, None]:
-    Base.metadata.create_all(engine)  # Create the tables.
     _app = create_app()
     yield _app
-    Base.metadata.drop_all(engine)
 
 
-@pytest.fixture
-def db_session(app: FastAPI) -> Generator[Session, Any, None]:
-    connection = engine.connect()
-    transaction = connection.begin()
-    session = Session(bind=connection)
-    yield session
-    session.close()
-    transaction.rollback()
-    connection.close()
+@pytest.fixture(scope='function')
+def setup_test_db():
+    create_schema()
+    db = db_session()
+    db.execute("INSERT INTO IMAGE_META (IMAGE_META_PK, IMAGE_META_ORIGIN_TYPE, IMAGE_META_ORIGIN_NM, ")
+    yield
+    drop_schema()
 
 
 @pytest.fixture()
-def client(app: FastAPI, db_session: Session) -> Generator[TestClient, Any, None]:
-    def _get_test_db():
-        try:
-            yield db_session
-        finally:
-            pass
-
-    app.dependency_overrides[get_db] = _get_test_db
+def client(app: FastAPI) -> Generator[TestClient, Any, None]:
     with TestClient(app) as client:
         yield client
+
+
+@pytest.fixture()
+def test_img():
+    test_img = open(get_absolute_path(["resource", "test_img.PNG"]), "rb")
+    return test_img
+
+
+@pytest.fixture()
+def test_datetime():
+    date_string = "2023-09-27 18:57:09"
+    date_format = "%Y-%m-%d %H:%M:%S"
+    return datetime.strptime(date_string, date_format)

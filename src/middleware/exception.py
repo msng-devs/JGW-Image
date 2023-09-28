@@ -13,13 +13,13 @@ async def catch_exceptions_middleware(request: Request, call_next):
     except InternalException as e:
         response = {
             "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-            "status": e.error_code.value()[2],
-            "error": e.error_code.value()[0],
+            "status": e.error_code.value[2],
+            "error": e.error_code.value[0],
             "message": e.message,
-            "errorCode": e.error_code.value()[1],
+            "errorCode": e.error_code.value[1],
             "path": request.url.path
         }
-        return Response(status_code=e.error_code.value()[2],
+        return Response(status_code=e.error_code.value[2],
                         content=json.dumps(response, default=lambda o: o.__dict__, sort_keys=True, indent=4,
                                            ensure_ascii=False),
                         media_type="application/json")

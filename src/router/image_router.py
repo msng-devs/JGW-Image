@@ -12,9 +12,9 @@ from src.helper.decorator import AuthMode, auth_mode
 from src.helper.exception import ImgProcessException, InternalException, ErrorCode
 from src.helper.image import optimize_image, move_image, load_img, delete_img
 import uuid
-from src.core.config import Config
-from src.helper.path import get_absolute_path
-import src.crud.image_crud as img_crud
+from src.core.config import config
+from src.helper.path import get_absolute_path, get_relative_path
+from src.crud.image_crud import find_by_id, create, delete_by_id
 from src.schema.response import ImageMetaResponse
 from logging import getLogger
 from src.helper.validation import validate_file_extension, validate_file_signature
@@ -22,23 +22,22 @@ from src.helper.validation import validate_file_extension, validate_file_signatu
 log = getLogger(__name__)
 img_router = APIRouter(prefix="/image")
 
-config = Config()
-
 
 @auth_mode(mode=AuthMode.NO_AUTH)
 @img_router.get("/{id}", response_class=Response)
 async def get_img_by_id(id: int, db: Session = Depends(get_db)):
-    img_meta = img_crud.find_by_id(db, id)
-    loaded_img = load_img(get_absolute_path([img_meta.IMAGE_META_FILE_PATH, img_meta.IMAGE_META_CONVERTED_NM]))
+    img_meta = find_by_id(db, id)
+    loaded_img = load_img(get_relative_path([img_meta.IMAGE_META_FILE_PATH, img_meta.IMAGE_META_CONVERTED_NM]))
     return Response(content=loaded_img, media_type=f"image/{img_meta.IMAGE_META_ORIGIN_TYPE}")
 
 
-@auth_mode(mode=AuthMode.AUTH)
+# @auth_mode(mode=AuthMode.AUTH)
 @img_router.delete("/{id}", response_model=ImageMetaResponse)
-async def delete_img_by_id(id: int,user_pk: Annotated[str | None, Header()] = None,role_pk: Annotated[int | None, Header()] = None  ,db: Session = Depends(get_db)):
+async def delete_img_by_id(id: int, user_pk: Annotated[str | None, Header()] = None,
+                           role_pk: Annotated[int | None, Header()] = None, db: Session = Depends(get_db)):
     delete_option = False if role_pk < 4 else True
-    img_meta = img_crud.delete_by_id(db, id, user_pk, delete_option)
-    delete_img(get_absolute_path([img_meta.IMAGE_META_FILE_PATH, img_meta.IMAGE_META_CONVERTED_NM]))
+    img_meta = delete_by_id(db, id, user_pk, delete_option)
+    delete_img(get_relative_path([img_meta.IMAGE_META_FILE_PATH, img_meta.IMAGE_META_CONVERTED_NM]))
     return {
         "id": img_meta.IMAGE_META_PK,
         "origin_type": img_meta.IMAGE_META_ORIGIN_TYPE,
@@ -51,9 +50,9 @@ async def delete_img_by_id(id: int,user_pk: Annotated[str | None, Header()] = No
     }
 
 
-@auth_mode(mode=AuthMode.AUTH)
+# @auth_mode(mode=AuthMode.AUTH)
 @img_router.post("", response_model=ImageMetaResponse)
-async def create_img(file: UploadFile,user_pk: Annotated[str | None, Header()] = None ,db: Session = Depends(get_db)):
+async def create_img(file: UploadFile, user_pk: Annotated[str | None, Header()] = None, db: Session = Depends(get_db)):
     detected_type = validate_file_extension(file)
     await validate_file_signature(file, detected_type)
 
@@ -68,7 +67,7 @@ async def create_img(file: UploadFile,user_pk: Annotated[str | None, Header()] =
         IMAGE_META_CREATED_AT=datetime.now()
     )
 
-    new_img_meta = img_crud.create(db, img_meta)
+    new_img_meta = create(db, img_meta)
 
     return {
         "id": new_img_meta.IMAGE_META_PK,
@@ -90,14 +89,14 @@ def convert_img(file: UploadFile):
 
         # gif일 경우 최적화 제외
         if file.filename.split(".")[-1] != "gif":
-            optimize_image(file.file, get_absolute_path([config.TMP_FILE_PATH, tmp_new_file_name]),
+            optimize_image(file.file, get_relative_path([config.TMP_FILE_PATH, tmp_new_file_name]),
                            config.IMG_QUALITY)
 
-            move_image(get_absolute_path([config.TMP_FILE_PATH, tmp_new_file_name]),
-                       get_absolute_path([config.FILE_PATH, new_file_name]))
+            move_image(get_relative_path([config.TMP_FILE_PATH, tmp_new_file_name]),
+                       get_relative_path([config.FILE_PATH, new_file_name]))
         else:
             log.debug("gif 파일이므로 최적화를 건너뜁니다.")
-            with open(get_absolute_path([config.FILE_PATH, new_file_name]), "wb") as buffer:
+            with open(get_relative_path([config.FILE_PATH, new_file_name]), "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
 
     except ImgProcessException as e:

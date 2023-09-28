@@ -15,7 +15,7 @@ class AuthMode(Enum):
 def auth_mode(mode: AuthMode, arg: str = None):
     def decorator(func):
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        async def wrapper(*args, **kwargs):
             request = kwargs.get('request')
             header = request.headers
 
@@ -43,6 +43,8 @@ def auth_mode(mode: AuthMode, arg: str = None):
                 if not (uid is None and role is None) and (uid is None or role is None):
                     raise InternalException("인증 정보가 없습니다.", ErrorCode.UNKNOWN_ERROR)
 
-            return wrapper
+            return await func(*args, **kwargs)
 
-        return decorator
+        return wrapper
+
+    return decorator

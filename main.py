@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from src.core.config import Config
+from src.core.config import config
 from src.middleware.exception import catch_exceptions_middleware
 from src.middleware.upload import LimitUploadSize
 from src.router.router import router
 from src.helper.log import setup_logging
 
-config = Config()
 setup_logging()
+config.print_setting()
 
 
 def create_app():

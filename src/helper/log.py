@@ -1,11 +1,10 @@
 import logging
-from src.core.config import Config
+from src.core.config import config
 
-confing = Config()
 
 level = logging.INFO
 
-if confing.LOGGING_LEVEL == "DEBUG":
+if config.LOGGING_LEVEL == "DEBUG":
     level = logging.DEBUG
 
 

@@ -1,6 +1,6 @@
 .idea
 data.db
-.env
+env/.env
 send_test.py
 
 # Byte-compiled / optimized / DLL files
@@ -125,9 +125,9 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+env/.env.local
+env/.env.production
 .venv
-env/
 venv/
 ENV/
 env.bak/

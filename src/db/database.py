@@ -1,13 +1,19 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 
-from src.core.config import Config
-
-setting = Config()
+from src.core.config import config
 
 Base = declarative_base()
-db_engine = create_engine(setting.DB_URL, pool_pre_ping=True)
+db_engine = create_engine(config.DB_URL, pool_pre_ping=True)
 db_session = sessionmaker(bind=db_engine, autoflush=False, autocommit=False)
+
+
+def create_schema():
+    Base.metadata.create_all(bind=db_engine)
+
+
+def drop_schema():
+    Base.metadata.drop_all(bind=db_engine)
 
 
 def get_db() -> Session:

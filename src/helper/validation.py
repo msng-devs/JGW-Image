@@ -1,21 +1,19 @@
 import fleep
 from fastapi import UploadFile
 
-from src.core.config import Config
+from src.core.config import config
 from src.helper.exception import ImgProcessException, ErrorCode, InternalException
-
-config = Config()
 
 
 def validate_file_extension(file: UploadFile):
-    file_type = file.filename.split(".")[-1]
+    file_type = file.filename.split(".")[-1].lower()
     if f"image/{file_type}" in config.ALLOWED_FILE_TYPE:
         return f"image/{file_type}"
     else:
         raise InternalException("업로드가 불가능한 타입입니다.", ErrorCode.INVALID_FILE_TYPE)
 
 
-async def validate_file_signature(file: UploadFile,detect_type: str):
+async def validate_file_signature(file: UploadFile, detect_type: str):
     file_content = await file.read(128)
 
     info = fleep.get(file_content)
