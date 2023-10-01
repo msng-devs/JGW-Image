@@ -5,14 +5,13 @@ COPY . /app
 
 RUN pip install --no-cache-dir -r requirements.txt
 RUN yes | pip install gunicorn
-ENV PYTHONPATH=/app
 ENV TZ=Asia/Seoul
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt-get update && apt-get install -y supervisor
 
 #unit test
 ENV API_SERVER_PROFILE=test
-RUN pytest app/ || exit 1
+RUN pytest . || exit 1
 RUN rm -f ./test
 
 #production
