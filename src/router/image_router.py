@@ -100,7 +100,7 @@ def convert_img(file: UploadFile):
 
     except ImgProcessException as e:
         log.error(str(e))
-        raise e
+        raise ImgProcessException(message="이미지 변환에 실패했습니다.")
 
     except InternalException as e:
         log.error(str(e))
