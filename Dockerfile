@@ -4,7 +4,7 @@ WORKDIR /app
 COPY . /app
 
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir -y gunicorn
+RUN yes | pip install gunicorn
 
 ENV TZ=Asia/Seoul
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
