@@ -8,6 +8,6 @@ if config.LOGGING_LEVEL == "DEBUG":
     level = logging.DEBUG
 
 
-def setup_logging():
+def setup_logging(who:str):
     logging.basicConfig(level=level,
-                        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s")
+                        format=f"[{who}] %(asctime)s - %(levelname)s - %(name)s - %(message)s")

@@ -6,7 +6,7 @@ from src.middleware.upload import LimitUploadSize
 from src.router.router import router
 from src.helper.log import setup_logging
 
-setup_logging()
+setup_logging("API")
 config.print_setting()
 
 
