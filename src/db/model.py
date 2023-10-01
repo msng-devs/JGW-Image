@@ -22,3 +22,4 @@ class ImageMeta(Base):
                                        "IMAGE_META_FILE_PATH", "IMAGE_META_ORIGIN_FILE_SIZE",
                                        "IMAGE_META_CONVERTED_NM", "IMAGE_META_UPLOAD_BY", "IMAGE_META_CREATED_AT"]) \
             .format(self=self)
+

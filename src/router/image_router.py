@@ -1,6 +1,6 @@
 import shutil
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Union
 
 from fastapi import APIRouter, UploadFile, Depends, Header
 from sqlalchemy.orm import Session
@@ -8,7 +8,8 @@ from starlette.responses import Response
 
 from src.db.database import get_db
 from src.db.model import ImageMeta
-from src.helper.decorator import AuthMode, auth_mode
+from src.helper.gateway_auth import auth
+
 from src.helper.exception import ImgProcessException, InternalException, ErrorCode
 from src.helper.image import optimize_image, move_image, load_img, delete_img
 import uuid
@@ -23,7 +24,6 @@ log = getLogger(__name__)
 img_router = APIRouter(prefix="/image")
 
 
-@auth_mode(mode=AuthMode.NO_AUTH)
 @img_router.get("/{id}", response_class=Response)
 async def get_img_by_id(id: int, db: Session = Depends(get_db)):
     img_meta = find_by_id(db, id)
@@ -31,13 +31,14 @@ async def get_img_by_id(id: int, db: Session = Depends(get_db)):
     return Response(content=loaded_img, media_type=f"image/{img_meta.IMAGE_META_ORIGIN_TYPE}")
 
 
-# @auth_mode(mode=AuthMode.AUTH)
-@img_router.delete("/{id}", response_model=ImageMetaResponse)
-async def delete_img_by_id(id: int, user_pk: Annotated[str | None, Header()] = None,
-                           role_pk: Annotated[int | None, Header()] = None, db: Session = Depends(get_db)):
-    delete_option = False if role_pk < 4 else True
+@img_router.delete("/{id}", response_model=ImageMetaResponse, dependencies=[Depends(auth)])
+async def delete_img_by_id(id: int, user_pk: Union[str, None] = Header(default=None, convert_underscores=False),
+                           role_pk: Union[int, None] = Header(default=None, convert_underscores=False),
+                           db: Session = Depends(get_db)):
+    delete_option = True if role_pk < 4 else False
     img_meta = delete_by_id(db, id, user_pk, delete_option)
     delete_img(get_relative_path([img_meta.IMAGE_META_FILE_PATH, img_meta.IMAGE_META_CONVERTED_NM]))
+
     return {
         "id": img_meta.IMAGE_META_PK,
         "origin_type": img_meta.IMAGE_META_ORIGIN_TYPE,
@@ -50,9 +51,9 @@ async def delete_img_by_id(id: int, user_pk: Annotated[str | None, Header()] = N
     }
 
 
-# @auth_mode(mode=AuthMode.AUTH)
-@img_router.post("", response_model=ImageMetaResponse)
-async def create_img(file: UploadFile, user_pk: Annotated[str | None, Header()] = None, db: Session = Depends(get_db)):
+@img_router.post("", response_model=ImageMetaResponse, dependencies=[Depends(auth)])
+async def create_img(file: UploadFile, user_pk: Union[str, None] = Header(default=None, convert_underscores=False), db: Session = Depends(get_db)):
+
     detected_type = validate_file_extension(file)
     await validate_file_signature(file, detected_type)
 
@@ -74,9 +75,7 @@ async def create_img(file: UploadFile, user_pk: Annotated[str | None, Header()] 
         "origin_type": new_img_meta.IMAGE_META_ORIGIN_TYPE,
         "origin_nm": new_img_meta.IMAGE_META_ORIGIN_NM,
         "origin_file_size": new_img_meta.IMAGE_META_ORIGIN_FILE_SIZE,
-        "file_path": new_img_meta.IMAGE_META_FILE_PATH,
         "upload_by": new_img_meta.IMAGE_META_UPLOAD_BY,
-        "converted_nm": new_img_meta.IMAGE_META_CONVERTED_NM,
         "created_at": new_img_meta.IMAGE_META_CREATED_AT.strftime("%Y-%m-%d %H:%M:%S")
     }
 

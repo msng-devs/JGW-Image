@@ -15,7 +15,5 @@ class ImageMetaResponse(BaseModel):
     origin_type: str
     origin_nm: str
     origin_file_size: int
-    file_path: str
     upload_by: str
-    converted_nm: str
     created_at: str

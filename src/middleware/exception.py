@@ -5,6 +5,9 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from src.helper.exception import InternalException, ImgProcessException
+from logging import getLogger
+
+log = getLogger(__name__)
 
 
 async def catch_exceptions_middleware(request: Request, call_next):
@@ -37,6 +40,7 @@ async def catch_exceptions_middleware(request: Request, call_next):
                                            ensure_ascii=False),
                         media_type="application/json")
     except Exception as e:
+        log.error(e.__class__.__name__ + " : " + str(e))
         response = {
             "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             "status": "INTERNAL_SERVER_ERROR",

@@ -2,11 +2,14 @@ import os
 
 from dotenv import load_dotenv
 import tempfile
-from src.helper.path import get_relative_path
+from src.helper.path import get_relative_path, get_absolute_path
 import logging
 
 log = logging.getLogger(__name__)
-load_dotenv(dotenv_path=get_relative_path(["env",f".env.{os.environ['API_SERVER_PROFILE']}"]))
+profile_name = os.environ['API_SERVER_PROFILE'] if os.environ.get('API_SERVER_PROFILE') else "test"
+
+load_dotenv(dotenv_path=get_relative_path([".", "env", f".env.{profile_name}"]))
+
 
 class Config:
     def __init__(self):
