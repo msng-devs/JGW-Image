@@ -17,6 +17,5 @@ RUN rm -rf .pytest_cache
 
 #production
 ENV API_SERVER_PROFILE=production
-ADD supervisord.conf /etc/supervisor/conf.d/
 
-ENTRYPOINT ["/usr/bin/supervisord"]
+ENTRYPOINT ["/usr/bin/supervisord", "-c", "./supervisord.conf"]
