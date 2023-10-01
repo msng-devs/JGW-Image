@@ -3,7 +3,7 @@ FROM python:3.11-bullseye
 WORKDIR /app
 COPY . /app
 
-RUN pip install --no-cache-dir -r -y requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt -y
 RUN pip install --no-cache-dir -y gunicorn
 
 ENV TZ=Asia/Seoul
