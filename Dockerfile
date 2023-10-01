@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y supervisor
 #unit test
 ENV API_SERVER_PROFILE=test
 RUN python -m pytest . || exit 1
-RUN rm -f ./test
+RUN rm -rf ./test
+RUN rm -rf .pytest_cache
 
 #production
 ENV API_SERVER_PROFILE=production
