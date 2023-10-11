@@ -13,13 +13,6 @@ config.print_setting()
 def create_app():
     tmp_app = FastAPI()
 
-    tmp_app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
     tmp_app.add_middleware(LimitUploadSize, max_upload_size=config.MAX_FILE_SIZE)
     tmp_app.middleware('http')(catch_exceptions_middleware)
     tmp_app.include_router(router)
