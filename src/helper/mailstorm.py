@@ -14,10 +14,14 @@ def send_mail(subject: str, text: str):
         "to": f"{config.MAIL_STORM_TO}",
         "subject": subject,
         "template": "dev-alert",
-        "arg": {
-            "content": text,
-            "title": "Image Server"
-        },
+        "arg": [
+            {
+                "content": text
+            },
+            {
+                "title": "Image Server"
+            }
+        ],
         "who": "image"
     }
     request = json.dumps(message, default=lambda o: o.__dict__, sort_keys=True, indent=4, ensure_ascii=False)
